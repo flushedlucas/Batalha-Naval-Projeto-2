@@ -1,0 +1,152 @@
+from random import *
+def conJogo(x):
+    x = x.upper()
+    if x == 'S':
+        return True
+    elif x == 'N':
+        return False
+    else:
+        print 'Entrada nao aceita. Responda S ou N'
+        conJogo(raw_input('Deseja Configurar o jogo? '))
+secura = 'S'
+while secura == 'S':
+    x = raw_input('Deseja Configurar o jogo? ')
+    y = conJogo(x)
+    nome = raw_input('Digite seu nome: ')
+    pt = 0
+    if y == True:
+        a = open("config.txt")
+        linhas1 = a.read()
+        linhas1 = linhas1.split('\n')
+        a.close()
+        lar = []
+        for i in linhas1:
+            j = i.find(':')
+            lar.append(i[j+2:])
+        grid = lar[0]
+        posx = grid.find('x')
+        linhas = int(grid[0:posx])
+        colunas = int(grid[posx+1:])
+        navios = int(lar[1])
+        erros = int(lar[2])
+        mc = ['.']*linhas
+        ex = ['.']*linhas
+        for i in range(linhas):
+            mc[i] = ['.']*colunas
+            ex[i] = ['.']*colunas
+        pos = 0
+        while pos < navios:
+            x = randint(0, colunas-1)
+            y = randint(0, linhas-1)
+            if mc[y][x] == 'N':
+                continue
+            else:
+                mc[y][x] = 'N'
+                pos +=1
+    else:
+        b = open("grid.txt")
+        linhas2 = b.readline()
+        pos = linhas2.find(':')
+        linhas3 = b.read()
+        linhas3 = linhas3.split('\n')
+        b.close()
+        lar2 = []
+        erros = int(linhas2[pos+2:])
+        mc = []
+        for t in linhas3:
+            linhas3.remove('')
+            t = t.split(' ')
+            mc.append(t)
+        del mc[0]
+        navios = 0
+        for i in mc:
+            for j in i:
+                if j == 'N':
+                    navios += 1
+        linhas = len(mc)
+        colunas = len(mc[0])
+        ex = ['.']*linhas
+        for i in range(linhas):
+            ex[i] = ['.']*colunas
+    tentativas = 0
+    acertos = 0
+    while tentativas <= erros:
+        coordenadas = True
+        print 'Digite a coordenada especificando a linha e a coluna(L,C)'
+        while True:
+            coo_linha = input('Linha: ')
+            if coo_linha > (linhas):
+                print 'Linha inexistente'
+            else:
+                break
+        while True:
+            coo_coluna = input('Coluna: ')
+            if coo_coluna > (colunas):
+                print 'Coluna inexistente'
+            else:
+                break
+        while coordenadas == True:
+            if  ex[coo_linha - 1][coo_coluna - 1] != '.':
+                coordenadas = False
+                print ('Coordenada ja utilizada')
+            else:
+                break
+        if coordenadas == True:
+            while True:
+                if mc[coo_linha - 1][coo_coluna - 1]== 'N':
+                    ex[coo_linha - 1][coo_coluna - 1] = 'X'
+                    for i, p in enumerate(ex):
+                        print ex[i]
+                    print 'Voce acertou um navio'
+                    acertos += 1
+                    pt += 10
+                    break
+                elif mc[coo_linha - 1][coo_coluna - 1]== '.':
+                    ex[coo_linha - 1][coo_coluna - 1] = '0'
+                    for i, p in enumerate(ex):
+                        print ex[i]
+                    print'Voce não acertou nenhum alvo'
+                    tentativas += 1
+                    pt -= 1
+                    break
+            if acertos == navios:
+                print 'Parabens voce acertou todos os navios'
+                break
+            elif tentativas > erros:
+                print 'Que pena, voce perdeu!'
+                c = open("scores.txt")
+                pts = c.read()
+                c.close()
+                pts = pts.split('\n')
+                pts.append(nome + ' ' + str(pt))
+                pts.remove('')
+                npts = []
+                ordem = []
+                for i in pts:
+                    pv = 0
+                    pos = i.find(' ')
+                    num = int(i[pos:])
+                    ordem.append(num)
+                    ordem.sort()
+                    ordem = ordem[::-1]
+                    if len(npts) == 0:
+                        npts.insert(0, i)
+                    else:
+                        while True:
+                            if pv > len(ordem)-1:
+                                npts.insert(pv, i)
+                                break
+                            elif num >= ordem[pv]:
+                                npts.insert(pv, i)
+                                break
+                            elif num < ordem[pv]:
+                                pv +=1
+                c = open("scores.txt", "w")
+                for i in npts:
+                    c.writelines(i+ '\n')
+                c.close()
+        else:
+            coordenadas = False
+
+    secura = raw_input ("Deseja jogar novamente? (S/N): ")
+    secura.upper()
